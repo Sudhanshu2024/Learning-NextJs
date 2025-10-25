@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output="../app/generated/prisma"
+  
 }
 
 datasource db {
@@ -26,5 +26,6 @@ model Todos {
   topic String
   description String
   author User @relation(fields:[authorid],references:[id])
-  authorid Int @unique
+  authorid Int 
+  @@map("todos")
 }

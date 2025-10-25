@@ -2,6 +2,7 @@
 
 import LogoutButton from '../components/LogoutButton'
 import { useSearchParams } from "next/navigation";
+import AddToDo from '../components/AddToDo'
 
 
     
@@ -13,6 +14,7 @@ export default function DashboardClient({ session }) {
       {message && <p>{message}</p>}
       <h1>Welcome, {session.user.name}</h1>
       <p>Email: {session.user.email}</p>
+      <AddToDo/>
       <LogoutButton/>
     </div>
   )
