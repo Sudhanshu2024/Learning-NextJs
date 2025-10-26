@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import {PrismaClient} from '@prisma/client';
+import  redisClient  from '../../redisclient'
 
 const prisma = new PrismaClient();
 async function getCurrentUser() {
@@ -29,12 +30,12 @@ export async function GET(request) {
     }
 
     // Try to get from cache first
-    // const cacheKey = `todos:${user.id}`
-    // const cachedTodos = await redis.get(cacheKey)
+    const cacheKey = `todos:${user.id}`
+    const cachedTodos = await redisClient.get(cacheKey)
     
-    // if (cachedTodos) {
-    //   return NextResponse.json(JSON.parse(cachedTodos))
-    // }
+    if (cachedTodos) {
+      return NextResponse.json(JSON.parse(cachedTodos))
+    }
 
     // Fetch from database
     const todos = await prisma.todos.findMany({
@@ -43,7 +44,7 @@ export async function GET(request) {
     })
 
     // Cache the result for 5 minutes
-    // await redis.setex(cacheKey, 300, JSON.stringify(todos))
+    await redisClient.setEx(cacheKey, 300, JSON.stringify(todos))
 
     return NextResponse.json(todos)
   } catch (error) {
@@ -84,8 +85,8 @@ export async function POST(request) {
     })
 
     // Invalidate cache
-    // const cacheKey = `todos:${user.id}`
-    // await redis.del(cacheKey)
+    const cacheKey = `todos:${user.id}`
+    await redisClient.del(cacheKey)
 
     return NextResponse.json(todo, { status: 201 })
   } catch (error) {
